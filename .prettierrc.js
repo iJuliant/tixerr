@@ -1,0 +1,3 @@
+moduele.exports = {
+  semi: false
+};
