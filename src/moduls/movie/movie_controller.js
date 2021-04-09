@@ -7,9 +7,22 @@ module.exports = {
   },
   getAllMovie: async (req, res) => {
     try {
-      console.log('Get All Movie Works !')
-      const result = await movieModel.getDataAll()
-      return helper.response(res, 200, 'GET ALL MOVIE SUCCESS', result)
+      let { page, limit } = req.query
+      page = +page
+      limit = +limit
+      const totalData = await movieModel.getCountData()
+
+      const totalPage = Math.ceil(totalData / limit)
+      console.log(limit)
+      const offset = page * limit - limit
+      const pageInfo = {
+        page,
+        totalPage,
+        limit,
+        totalData
+      }
+      const result = await movieModel.getDataAll(limit, offset)
+      return helper.response(res, 200, 'Success Get Data', result, pageInfo)
     } catch (error) {
       return helper.response(res, 400, 'Bad Request', Error)
     }
@@ -36,24 +49,40 @@ module.exports = {
         release_date: releaseDate
       }
       const result = await movieModel.createMovie(setData)
-      return helper.response(res, 200, 'Success Create Movie', result)
+      return helper.response(res, 200, 'Success Creating Data', result)
     } catch {
       return helper.response(res, 400, 'Bad Request', Error)
     }
   },
   updateMovie: async (req, res) => {
     try {
-      console.log(req.params)
-      console.log(req.body)
+      const { id } = req.params
+      const { title, category, releaseDate } = req.body
+      const setData = {
+        title: title,
+        category: category,
+        release_date: releaseDate,
+        updated_at: new Date(Date.now())
+      }
+      const result = await movieModel.updateMovie(setData, id)
+      return helper.response(res, 200, `Success Updating data ${result.title}`)
+      // console.log(req.params)
+      // console.log(req.body)
     } catch {
       return helper.response(res, 400, 'Bad Request', Error)
     }
   },
   deleteMovie: async (req, res) => {
-    try {
-      console.log(req.params)
-    } catch {
-      return helper.response(res, 400, 'Bad Request', Error)
-    }
+    // try {
+    //   // const { id } = req.params
+    //   // const { title, category, releaseDate } = req.body
+    //   // const setData = {
+    //   //   title: title,
+    //   //   category: category,
+    //   //   release_date: releaseDate
+    //   }
+    // } catch {
+    //   return helper.response(res, 400, 'Bad Request', Error)
+    // }
   }
 }
