@@ -8,6 +8,7 @@ Route.get('/hello', (req, res) => {
 
 Route.get('/', movieController.getAllMovie)
 Route.get('/:id', movieController.getMovieById)
+Route.get('/search/:like', movieController.searchMovie)
 Route.post('/', movieController.postMovie)
 Route.patch('/:id', movieController.updateMovie)
 Route.delete('/:id', movieController.deleteMovie)

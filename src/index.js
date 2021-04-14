@@ -6,7 +6,8 @@ const compression = require('compression')
 const bodyParser = require('body-parser')
 const routerNavigation = require('./routes')
 
-const port = 3000
+const port = process.env.PORT || 3000
+require('dotenv').config()
 
 const app = express()
 
@@ -23,11 +24,6 @@ app.use(cors())
 app.options('*', cors())
 
 app.use('/api/v1', routerNavigation)
-
-app.post('/movie', (req, res) => {
-  console.log('POST movie -->')
-  console.log(req.body)
-})
 
 app.listen(port, () => {
   console.log(`App is listening on port ${port}`)

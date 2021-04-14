@@ -1,51 +1,38 @@
 const helper = require('../../helpers/wrapper')
-const movieModel = require('./movie_model')
+const showTimeModel = require('./show_time_model')
 
 module.exports = {
   sayHello: (req, res) => {
     res.status(200).send('Hello World')
   },
-  getAllMovie: async (req, res) => {
+  getAllShows: async (req, res) => {
     try {
       let { page, limit, keySearch, orderBy } = req.query
       page = +page
       limit = +limit
       if (!keySearch) {
-        const totalData = await movieModel.getCountData()
-        const totalPage = await movieModel.getCountData()
+        const totalData = await showTimeModel.getCountData()
+        const totalPage = await showTimeModel.getCountData()
         const offset = page * limit - limit
         const pageInfo = { page, totalPage, limit, totalData }
-        const result = await movieModel.getDataAll(limit, offset)
+        const result = await showTimeModel.getDataAll(limit, offset)
         return helper.response(res, 200, 'Success Get Data', result, pageInfo)
       } else {
-        const result = await movieModel.searchMovie(keySearch, orderBy)
+        const result = await showTimeModel.searchShows(keySearch, orderBy)
         if (result.length > 0) {
           return helper.response(res, 200, `Found ${result.length} data like ${keySearch}`, result)
         } else {
           return helper.response(res, 400, `Data like ${keySearch} does not exist`, null)
         }
       }
-      // const totalData = await movieModel.getCountData()
-
-      // const totalPage = Math.ceil(totalData / limit)
-      // console.log(limit)
-      // const offset = page * limit - limit
-      // const pageInfo = {
-      //   page,
-      //   totalPage,
-      //   limit,
-      //   totalData
-      // }
-      // const result = await movieModel.getDataAll(limit, offset)
-      // return helper.response(res, 200, 'Success Get Data', result, pageInfo)
     } catch (error) {
       return helper.response(res, 400, 'Bad Request', Error)
     }
   },
-  searchMovie: async (req, res) => {
+  searchShows: async (req, res) => {
     try {
       const { like } = req.params
-      const result = await movieModel.searchMovie(like)
+      const result = await showTimeModel.searchShows(like)
       console.log(like)
       if (result.length > 0) {
         return helper.response(res, 200, `Found ${result.length} data like ${like}`, result)
@@ -57,10 +44,10 @@ module.exports = {
       return helper.response(res, 400, 'Bad Request', Error)
     }
   },
-  getMovieById: async (req, res) => {
+  getShowById: async (req, res) => {
     try {
       const { id } = req.params
-      const result = await movieModel.getMovieById(id)
+      const result = await showTimeModel.getShowById(id)
       if (result.length > 0) {
         return helper.response(res, 200, 'Success Get Data by Id', result)
       } else {
@@ -70,31 +57,30 @@ module.exports = {
       return helper.response(res, 400, 'Bad Request', Error)
     }
   },
-  postMovie: async (req, res) => {
+  postShow: async (req, res) => {
     try {
-      const { title, category, releaseDate } = req.body
+      const { premiereId, showTimeDate, showTimeClock } = req.body
       const setData = {
-        movie_title: title,
-        movie_category: category,
-        movie_release_date: releaseDate
+        premiere_id: premiereId,
+        show_time_date: showTimeDate,
+        show_time_clock: showTimeClock
       }
-      const result = await movieModel.createMovie(setData)
+      const result = await showTimeModel.createShow(setData)
       return helper.response(res, 200, 'Success Creating Data', result)
     } catch {
       return helper.response(res, 400, 'Bad Request', Error)
     }
   },
-  updateMovie: async (req, res) => {
+  updateShow: async (req, res) => {
     try {
       const { id } = req.params
-      const { title, category, releaseDate } = req.body
+      const { premiereId, showTimeDate, showTimeClock } = req.body
       const setData = {
-        movie_title: title,
-        movie_category: category,
-        movie_release_date: releaseDate,
-        movie_updated_at: new Date(Date.now())
+        premiere_id: premiereId,
+        show_time_date: showTimeDate,
+        show_time_clock: showTimeClock
       }
-      const result = await movieModel.updateMovie(setData, id)
+      const result = await showTimeModel.updateShow(setData, id)
       return helper.response(res, 200, 'Success Updating Data', result)
       // console.log(req.params)
       // console.log(req.body)
@@ -102,12 +88,12 @@ module.exports = {
       return helper.response(res, 400, 'Bad Request', Error)
     }
   },
-  deleteMovie: async (req, res) => {
+  deleteShow: async (req, res) => {
     try {
       const { id } = req.params
-      const validate = await movieModel.getMovieById(id)
+      const validate = await showTimeModel.getShowById(id)
       if (validate.length > 0) {
-        const result = await movieModel.deleteMovie(id)
+        const result = await showTimeModel.deleteShow(id)
         return helper.response(res, 200, 'Success deleting data', result)
       } else {
         return helper.response(res, 400, `Data ${id} not found`)
