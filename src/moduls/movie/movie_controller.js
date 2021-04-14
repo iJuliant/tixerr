@@ -8,8 +8,8 @@ module.exports = {
   getAllMovie: async (req, res) => {
     try {
       let { page, limit, keySearch, orderBy } = req.query
-      page = +page
-      limit = +limit
+      page = page ? +page : page = 1
+      limit = limit ? +limit : limit = 5
       if (!keySearch) {
         const totalData = await movieModel.getCountData()
         const totalPage = Math.ceil(totalData / limit)

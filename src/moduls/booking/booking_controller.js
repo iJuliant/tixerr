@@ -42,22 +42,26 @@ module.exports = {
   },
   postBooking: async (req, res) => {
     try {
-      const { premiereId, ticket, paymentMethod, status } = req.body
-      const seatLocation = req.body.seatLocation
-      const getPrice = premiere.getPremiereById(premiereId)
-      console.log(getPrice)
-      const seedToBooking = {
-        premiere_id: premiereId,
-        booking_ticket: ticket,
-        booking_totalPrice: getPrice[0].premiere_price * ticket,
-        booking_payment_method: paymentMethod,
-        booking_status: status
-      }
+      let { premiereId, ticket, paymentMethod, status, seatLocation } = req.body
+      // const seatLocation = req.body.seatLocation
+      // const getPrice = premiere.getPremiereById(premiereId)
+      // console.log(getPrice)
+      // const seedToBooking = {
+      //   premiere_id: premiereId,
+      //   booking_ticket: ticket,
+      //   booking_totalPrice: getPrice[0].premiere_price * ticket,
+      //   booking_payment_method: paymentMethod,
+      //   booking_status: status
+      // }
+      // const result = await bookingModel.postBooking(seedToBooking)
       for (const i in seatLocation) {
-        bookingModel.postBookingSeat(seatLocation[i])
+        setData {
+          bookingId: 0
+          booking_seat_location: seatLocation[i]
+        }
       }
-      const result = await bookingModel.postBooking(seedToBooking)
-      return helper.response(res, 200, 'Success Posting Data', result)
+
+      // return helper.response(res, 200, 'Success Posting Data', result)
     } catch {
       return helper.response(res, 400, 'Bad Request', Error)
     }
