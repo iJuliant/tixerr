@@ -12,7 +12,7 @@ module.exports = {
       limit = +limit
       if (!keySearch) {
         const totalData = await premiereModel.getCountData()
-        const totalPage = await premiereModel.getCountData()
+        const totalPage = Math.ceil(totalData / limit)
         const offset = page * limit - limit
         const pageInfo = { page, totalPage, limit, totalData }
         const result = await premiereModel.getDataAll(limit, offset)
@@ -49,6 +49,7 @@ module.exports = {
       const { id } = req.params
       const result = await premiereModel.getPremiereById(id)
       if (result.length > 0) {
+        console.log(result[0].premiere_price)
         return helper.response(res, 200, 'Success Get Premiere By Id', result)
       } else {
         return helper.response(res, 400, 'Bad Request', `Data id ${id} not found`, null)
@@ -75,6 +76,7 @@ module.exports = {
   updatePremiere: async (req, res) => {
     try {
       const { id } = req.params
+      const isData = await premiereModel.getPremiereById(id)
       const { movieId, locationId, premiereName, premierePrice } = req.body
       const setData = {
         movie_id: movieId,
@@ -83,8 +85,12 @@ module.exports = {
         premiere_price: premierePrice,
         premiere_updated_at: new Date(Date.now())
       }
-      const result = await premiereModel.updatePremiere(setData, id)
-      return helper.response(res, 200, 'Success Updating Data', result)
+      if (isData.length > 0) {
+        const result = await premiereModel.updatePremiere(setData, id)
+        return helper.response(res, 200, 'Success Updating Data', result)
+      } else {
+        return helper.response(res, 404, 'Cannot Update Empty Data', null)
+      }
     } catch {
       return helper.response(res, 400, 'Bad Request', Error)
     }

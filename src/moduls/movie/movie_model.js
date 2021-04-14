@@ -17,7 +17,7 @@ module.exports = {
   },
   searchMovie: (like, orderBy) => {
     return new Promise((resolve, reject) => {
-      connection.query(`SELECT * FROM movie WHERE movie_title LIKE '%${like}%' ORDER BY movie_title ASC`, like, (error, result) => {
+      connection.query(`SELECT * FROM movie WHERE movie_title LIKE '%${like}%' ORDER BY movie_title ${orderBy}`, like, (error, result) => {
         !error ? resolve(result) : reject(new Error(error))
       })
     })

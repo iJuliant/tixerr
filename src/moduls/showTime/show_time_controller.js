@@ -12,7 +12,7 @@ module.exports = {
       limit = +limit
       if (!keySearch) {
         const totalData = await showTimeModel.getCountData()
-        const totalPage = await showTimeModel.getCountData()
+        const totalPage = Math.ceil(totalData / limit)
         const offset = page * limit - limit
         const pageInfo = { page, totalPage, limit, totalData }
         const result = await showTimeModel.getDataAll(limit, offset)

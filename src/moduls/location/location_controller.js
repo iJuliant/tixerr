@@ -12,7 +12,7 @@ module.exports = {
       limit = +limit
       if (!keySearch) {
         const totalData = await locationModel.getCountData()
-        const totalPage = await locationModel.getCountData()
+        const totalPage = Math.ceil(page / limit)
         const offset = page * limit - limit
         const pageInfo = { page, totalPage, limit, totalData }
         const result = await locationModel.getDataAll(limit, offset)

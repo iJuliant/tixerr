@@ -12,7 +12,7 @@ module.exports = {
       limit = +limit
       if (!keySearch) {
         const totalData = await movieModel.getCountData()
-        const totalPage = await movieModel.getCountData()
+        const totalPage = Math.ceil(totalData / limit)
         const offset = page * limit - limit
         const pageInfo = { page, totalPage, limit, totalData }
         const result = await movieModel.getDataAll(limit, offset)
@@ -87,6 +87,7 @@ module.exports = {
   updateMovie: async (req, res) => {
     try {
       const { id } = req.params
+      const isData = await movieModel.getMovieById(id)
       const { title, category, releaseDate } = req.body
       const setData = {
         movie_title: title,
@@ -94,10 +95,12 @@ module.exports = {
         movie_release_date: releaseDate,
         movie_updated_at: new Date(Date.now())
       }
-      const result = await movieModel.updateMovie(setData, id)
-      return helper.response(res, 200, 'Success Updating Data', result)
-      // console.log(req.params)
-      // console.log(req.body)
+      if (isData.length === 0) {
+        return helper.response(res, 404, 'Cannot Update Empty Data')
+      } else {
+        const result = await movieModel.updateMovie(setData, id)
+        return helper.response(res, 200, 'Success Updating Data', result)
+      }
     } catch {
       return helper.response(res, 400, 'Bad Request', Error)
     }
