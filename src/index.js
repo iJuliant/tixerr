@@ -6,7 +6,7 @@ const compression = require('compression')
 const bodyParser = require('body-parser')
 const routerNavigation = require('./routes')
 
-const port = process.env.PORT || 3000
+const port = 4000
 require('dotenv').config()
 
 const app = express()

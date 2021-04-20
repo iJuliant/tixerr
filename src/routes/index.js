@@ -10,6 +10,6 @@ Route.use('/movie', movieRouter)
 Route.use('/location', locationRouter)
 Route.use('/premiere', premiereRoute)
 Route.use('/show-time', showTimeRoute)
-Route.use('/booking', bookingRoute)
+// Route.use('/booking', bookingRoute)
 
 module.exports = Route
