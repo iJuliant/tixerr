@@ -1,16 +1,32 @@
 const express = require('express')
 const Route = express.Router()
 const locationController = require('./location_controller')
+const authMiddleware = require('../../middleware/auth')
 
 Route.get('/hello', (req, res) => {
   locationController.sayHello()
 })
 
-Route.get('/', locationController.getAllLocation)
-Route.get('/search/:like', locationController.searchLocation)
+Route.get('/', locationController.getDataAll)
+
 Route.get('/:id', locationController.getLocationById)
-Route.post('/', locationController.postLocation)
-Route.patch('/:id', locationController.updateLocation)
-Route.delete('/:id', locationController.deleteLocation)
+
+Route.post('/',
+  authMiddleware.authentication,
+  authMiddleware.isAdmin,
+  locationController.postLocation
+)
+
+// Route.patch('/:id',
+//   authMiddleware.authentication,
+//   authMiddleware.isAdmin,
+//   locationController.patchLocation
+// )
+
+// Route.delete('/:id',
+//   authMiddleware.authentication,
+//   authMiddleware.isAdmin,
+//   locationController.deleteLocation
+// )
 
 module.exports = Route

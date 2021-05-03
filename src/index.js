@@ -5,8 +5,8 @@ const helmet = require('helmet')
 const compression = require('compression')
 const bodyParser = require('body-parser')
 const routerNavigation = require('./routes')
-
-const port = 4000
+const path = require('path')
+const port = process.env.PORT || 4000
 require('dotenv').config()
 
 const app = express()
@@ -24,6 +24,7 @@ app.use(cors())
 app.options('*', cors())
 
 app.use('/api/v1', routerNavigation)
+app.use('/api', express.static(path.join(__dirname, 'uploads')))
 
 app.listen(port, () => {
   console.log(`App is listening on port ${port}`)

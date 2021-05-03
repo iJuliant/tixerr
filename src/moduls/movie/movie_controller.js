@@ -1,10 +1,10 @@
 const helper = require('../../helpers/wrapper')
+const redis = require('redis')
+const client = redis.createClient()
 const movieModel = require('./movie_model')
+const fs = require('fs')
 
 module.exports = {
-  sayHello: (req, res) => {
-    res.status(200).send('Hello World')
-  },
   getAllMovie: async (req, res) => {
     try {
       let { page, limit, keySearch, orderBy } = req.query
@@ -14,8 +14,14 @@ module.exports = {
         const totalData = await movieModel.getCountData()
         const totalPage = Math.ceil(totalData / limit)
         const offset = page * limit - limit
-        const pageInfo = { page, totalPage, limit, totalData }
+        const pageInfo = {
+          page,
+          totalPage,
+          limit,
+          totalData
+        }
         const result = await movieModel.getDataAll(limit, offset)
+        client.setex(`getmovie:${JSON.stringify(req.query)}`, 3600, JSON.stringify({ result, pageInfo }))
         return helper.response(res, 200, 'Success Get Data', result, pageInfo)
       } else {
         const result = await movieModel.searchMovie(keySearch, orderBy)
@@ -25,19 +31,6 @@ module.exports = {
           return helper.response(res, 400, `Data like ${keySearch} does not exist`, null)
         }
       }
-      // const totalData = await movieModel.getCountData()
-
-      // const totalPage = Math.ceil(totalData / limit)
-      // console.log(limit)
-      // const offset = page * limit - limit
-      // const pageInfo = {
-      //   page,
-      //   totalPage,
-      //   limit,
-      //   totalData
-      // }
-      // const result = await movieModel.getDataAll(limit, offset)
-      // return helper.response(res, 200, 'Success Get Data', result, pageInfo)
     } catch (error) {
       return helper.response(res, 400, 'Bad Request', Error)
     }
@@ -62,6 +55,7 @@ module.exports = {
       const { id } = req.params
       const result = await movieModel.getMovieById(id)
       if (result.length > 0) {
+        client.set(`getmovie:${id}`, JSON.stringify(result))
         return helper.response(res, 200, 'Success Get Data by Id', result)
       } else {
         return helper.response(res, 404, `Data ${id} not found`, null)
@@ -72,12 +66,17 @@ module.exports = {
   },
   postMovie: async (req, res) => {
     try {
-      const { title, category, releaseDate } = req.body
+      const { title, releaseDate, duration, director, casts, synopsis } = req.body
       const setData = {
         movie_title: title,
-        movie_category: category,
-        movie_release_date: releaseDate
+        movie_release_date: releaseDate,
+        movie_image: req.file ? req.file.filename : '',
+        movie_duration: duration,
+        movie_director: director,
+        movie_casts: casts,
+        movie_synopsis: synopsis
       }
+      console.log(setData)
       const result = await movieModel.createMovie(setData)
       return helper.response(res, 200, 'Success Creating Data', result)
     } catch {
@@ -86,22 +85,37 @@ module.exports = {
   },
   updateMovie: async (req, res) => {
     try {
+      console.log('process di update movie')
+      console.log(req.params)
       const { id } = req.params
       const isData = await movieModel.getMovieById(id)
-      const { title, category, releaseDate } = req.body
+      const { title, releaseDate, duration, director, casts, synopsis } = req.body
       const setData = {
         movie_title: title,
-        movie_category: category,
         movie_release_date: releaseDate,
+        movie_image: req.file ? req.file.filename : '',
+        movie_duration: duration,
+        movie_director: director,
+        movie_casts: casts,
+        movie_synopsis: synopsis,
         movie_updated_at: new Date(Date.now())
       }
       if (isData.length === 0) {
         return helper.response(res, 404, 'Cannot Update Empty Data')
       } else {
-        const result = await movieModel.updateMovie(setData, id)
-        return helper.response(res, 200, 'Success Updating Data', result)
+        // console.log(isData)
+        const result = movieModel.updateMovie(setData, id)
+        fs.unlink(`/src/uploads/${isData[0].movie_image}`, (error) => {
+          if (error) {
+            console.log(error)
+          } else {
+            console.log('no error')
+          }
+        })
+        return helper.response(res, 200, 'Success updating movie', result)
       }
-    } catch {
+    } catch (error) {
+      console.log(error)
       return helper.response(res, 400, 'Bad Request', Error)
     }
   },
@@ -111,6 +125,13 @@ module.exports = {
       const validate = await movieModel.getMovieById(id)
       if (validate.length > 0) {
         const result = await movieModel.deleteMovie(id)
+        fs.unlink(`/src/uploads/${validate[0].movie_image}`, (error) => {
+          if (error) {
+            console.log(error)
+          } else {
+            console.log('no error')
+          }
+        })
         return helper.response(res, 200, 'Success deleting data', result)
       } else {
         return helper.response(res, 400, `Data ${id} not found`)
