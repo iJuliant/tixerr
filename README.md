@@ -1,4 +1,3 @@
-# android2-backend
 Beginner &amp; Intermediate Backend
 <h1 align="center">BEGINNER BACKEND - TICKITZ RESTfull API</h1>
 
